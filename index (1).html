@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #a18aff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #a18aff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        .category {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .category-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .task-list, .settings-panel {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .task-checkbox {
+            margin-right: 10px;
+        }
+        .task-title {
+            flex-grow: 1;
+        }
+        .task-time {
+            color: #888;
+        }
+        .add-task-form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .add-task-form input, .add-task-form select {
+            margin-right: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .add-task-form button {
+            background-color: #a18aff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .nav-icon {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #a18aff;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <div>
+                    <h3 style="margin: 0;">Do-it</h3>
+                    <p style="margin: 0; color: #888;">Ashok</p>
+                </div>
+            </div>
+            <h4>Today tasks</h4>
+            <div class="category" data-category="personal">
+                <div class="category-dot" style="background-color: #CA8BFE;"></div>
+                Personal
+            </div>
+            <div class="category" data-category="freelance">
+                <div class="category-dot" style="background-color: #3FD4F4;"></div>
+                Freelance
+            </div>
+            <div class="category" data-category="work">
+                <div class="category-dot" style="background-color: #FD99AF;"></div>
+                Work
+            </div>
+            <div class="nav-item" data-view="scheduled">
+                <div class="nav-icon">📅</div>
+                Scheduled tasks
+            </div>
+            <div class="nav-item" data-view="settings">
+                <div class="nav-icon">⚙️</div>
+                Settings
+            </div>
+        </div>
+        <div class="main-content">
+            <div id="tasks-view">
+                <h1>Today main focus</h1>
+                <div class="task-list">
+                    <form id="add-task-form" class="add-task-form">
+                        <input type="text" id="task-input" placeholder="Add a new task" required>
+                        <input type="time" id="time-input" required>
+                        <input type="date" id="date-input" required>
+                        <select id="category-input">
+                            <option value="personal">Personal</option>
+                            <option value="freelance">Freelance</option>
+                            <option value="work">Work</option>
+                        </select>
+                        <button type="submit">+</button>
+                    </form>
+                    <div id="personal-tasks">
+                        <div class="category-header">
+                            <div class="category-dot" style="background-color: #CA8BFE;"></div>
+                            <h3>Personal</h3>
+                        </div>
+                    </div>
+                    <div id="freelance-tasks">
+                        <div class="category-header">
+                            <div class="category-dot" style="background-color: #3FD4F4;"></div>
+                            <h3>Freelance</h3>
+                        </div>
+                    </div>
+                    <div id="work-tasks">
+                        <div class="category-header">
+                            <div class="category-dot" style="background-color: #FD99AF;"></div>
+                            <h3>Work</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="scheduled-view" style="display: none;">
+                <h1>Scheduled tasks</h1>
+                <div id="scheduled-tasks" class="task-list"></div>
+            </div>
+            <div id="settings-view" style="display: none;">
+                <h1>Settings</h1>
+                <div class="settings-panel">
+                    <div class="settings-item">
+                        <span>Edit Profile</span>
+                        <span>></span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Change password</span>
+                        <span>></span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Privacy</span>
+                        <span>></span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Notifications</span>
+
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <span>Language</span>
+                        <span>></span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Currency</span>
+                        <span>></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('add-task-form');
+            const taskInput = document.getElementById('task-input');
+            const timeInput = document.getElementById('time-input');
+            const dateInput = document.getElementById('date-input');
+            const categoryInput = document.getElementById('category-input');
+            const tasksView = document.getElementById('tasks-view');
+            const scheduledView = document.getElementById('scheduled-view');
+            const settingsView = document.getElementById('settings-view');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addTask(taskInput.value, timeInput.value, dateInput.value, categoryInput.value);
+                form.reset();
+            });
+
+            function addTask(title, time, date, category) {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <input type="checkbox" class="task-checkbox">
+                    <span class="task-title">${title}</span>
+                    <span class="task-time">${time}</span>
+                `;
+
+                const today = new Date().toISOString().split('T')[0];
+                if (date === today) {
+                    const categoryContainer = document.getElementById(`${category}-tasks`);
+                    categoryContainer.appendChild(taskItem);
+                } else {
+                    const scheduledTasks = document.getElementById('scheduled-tasks');
+                    taskItem.innerHTML += `<span class="task-date">${date}</span>`;
+                    scheduledTasks.appendChild(taskItem);
+                }
+
+                const checkbox = taskItem.querySelector('.task-checkbox');
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        taskItem.querySelector('.task-title').style.textDecoration = 'line-through';
+                        taskItem.querySelector('.task-title').style.color = '#888';
+                    } else {
+                        taskItem.querySelector('.task-title').style.textDecoration = 'none';
+                        taskItem.querySelector('.task-title').style.color = 'inherit';
+                    }
+                });
+            }
+
+            // Navigation
+            document.querySelectorAll('.category, .nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const view = this.dataset.view;
+                    if (view === 'scheduled') {
+                        tasksView.style.display = 'none';
+                        scheduledView.style.display = 'block';
+                        settingsView.style.display = 'none';
+                    } else if (view === 'settings') {
+                        tasksView.style.display = 'none';
+                        scheduledView.style.display = 'none';
+                        settingsView.style.display = 'block';
+                    } else {
+                        tasksView.style.display = 'block';
+                        scheduledView.style.display = 'none';
+                        settingsView.style.display = 'none';
+                    }
+                });
+            });
+
+            // Add some initial tasks
+            const today = new Date().toISOString().split('T')[0];
+            addTask('Work out', '08:00', today, 'personal');
+            addTask('Design team meeting', '14:30', today, 'work');
+            addTask('Hand off the project', '19:00', today, 'freelance');
+            addTask('Read 5 pages of "sprint"', '22:30', today, 'personal');
+
+            // Add a scheduled task
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowString = tomorrow.toISOString().split('T')[0];
+            addTask('Dentist appointment', '10:00', tomorrowString, 'personal');
+        });
+    </script>
+</body>
+</html>
